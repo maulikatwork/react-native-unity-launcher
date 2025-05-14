@@ -1,11 +1,9 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application>
         <activity
             android:name="com.unity3d.player.UnityPlayerActivity"
-            android:label="UnityPlayerActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-            android:launchMode="singleTask"
-            android:screenOrientation="landscape" />
+            android:launchMode="singleTask" />
     </application>
 </manifest>
