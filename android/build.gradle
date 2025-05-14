@@ -27,7 +27,19 @@ android {
     }
 }
 
+repositories {
+    mavenCentral()
+    google()
+    maven {
+        // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
+        url "$rootDir/../node_modules/react-native/android"
+    }
+}
+
 dependencies {
     // Use the Unity AAR file from the libs directory
     implementation fileTree(dir: 'libs', include: ['*.aar'])
+    
+    // React Native dependencies
+    compileOnly 'com.facebook.react:react-native:+'
 }
