@@ -90,6 +90,15 @@ No additional Unity AAR files or manual configuration is required as they are bu
    - Verify that your device supports the required OpenGL version
    - Check Unity-specific logs in the Android Logcat
 
+3. **Could not find :unity-export: dependency error**
+   - This error occurs when the Android build system cannot locate the Unity AAR file
+   - Make sure you're using the latest version of the package which should include the file in the libs directory
+   - If the error persists, you can also add your Unity app's AAR file manually to the `node_modules/react-native-unity-launcher/android/libs` directory
+
+4. **AndroidManifest.xml package attribute warning**
+   - This warning is related to newer versions of Gradle not supporting the package attribute in the manifest
+   - Update the package to the latest version which uses the proper namespace configuration in build.gradle
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
