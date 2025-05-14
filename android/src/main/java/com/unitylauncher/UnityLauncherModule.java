@@ -32,7 +32,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void launchUnityWithCallback(Callback callback) {
         unityReturnCallback = callback;
-        Intent intent = new Intent(reactContext, com.yourcompany.CustomUnityPlayerActivity.class);
+        Intent intent = new Intent(reactContext, com.unity3d.player.CustomUnityPlayerActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         reactContext.startActivity(intent);
     }
