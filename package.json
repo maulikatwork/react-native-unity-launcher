@@ -1,0 +1,11 @@
+{
+    "name": "react-native-unity-launcher",
+    "version": "0.1.0",
+    "main": "index.js",
+    "keywords": ["react-native", "unity", "android", "game"],
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/maulikatwork/react-native-unity-launcher.git"
+    }
+  }
+  
