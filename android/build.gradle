@@ -27,5 +27,6 @@ android {
 }
 
 dependencies {
-    implementation(name: 'unity-export', ext: 'aar')
+    // Use the Unity AAR file from the libs directory
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
 }
