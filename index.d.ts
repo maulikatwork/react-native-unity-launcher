@@ -1,7 +1,7 @@
 declare module 'react-native-unity-launcher' {
   /**
    * Launches the Unity application
-   * @returns A Promise that resolves when Unity is launched successfully
+   * @returns The return value from the native Unity launcher module
    */
-  export function launchUnity(): Promise<void>;
+  export function launchUnity(): any;
 } 
