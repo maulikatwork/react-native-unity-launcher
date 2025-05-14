@@ -2,6 +2,7 @@
     "name": "react-native-unity-launcher",
     "version": "0.1.0",
     "main": "index.js",
+    "types": "index.d.ts",
     "keywords": ["react-native", "unity", "android", "game"],
     "repository": {
       "type": "git",
