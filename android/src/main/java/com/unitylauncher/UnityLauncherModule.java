@@ -202,7 +202,12 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
         };
         
         IntentFilter filter = new IntentFilter("com.unitylauncher.UNITY_FINISHED");
-        reactContext.registerReceiver(unityFinishedReceiver, filter);
+        // Register receiver with explicit exported flag for Android 12+ compatibility
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            reactContext.registerReceiver(unityFinishedReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            reactContext.registerReceiver(unityFinishedReceiver, filter);
+        }
     }
 
     @Override
