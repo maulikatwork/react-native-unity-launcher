@@ -35,7 +35,9 @@ dependencies {
 }
 ```
 
-3. Register the package in your `MainApplication.java`:
+3. Register the package in your `MainApplication`:
+
+#### For Java (MainApplication.java):
 
 ```java
 import com.unitylauncher.UnityLauncherPackage; // Add this import
@@ -47,6 +49,18 @@ protected List<ReactPackage> getPackages() {
     packages.add(new UnityLauncherPackage());
     return packages;
 }
+```
+
+#### For Kotlin (MainApplication.kt):
+
+```kotlin
+import com.unitylauncher.UnityLauncherPackage // Add this import
+
+override fun getPackages(): List<ReactPackage> =
+            PackageList(this).packages.apply {
+              // Add Unity Package
+              add(UnityLauncherPackage())
+            }
 ```
 
 ## Usage
