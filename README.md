@@ -5,7 +5,14 @@ A React Native package for launching Unity applications from within React Native
 ## Installation
 
 ```bash
-npm install react-native-unity-launcher --save
+npm install github:maulikatwork/react-native-unity-launcher
+```
+
+You can also install a specific branch or commit:
+
+```bash
+npm install github:maulikatwork/react-native-unity-launcher#branch-name
+npm install github:maulikatwork/react-native-unity-launcher#commit-hash
 ```
 
 ## Usage
