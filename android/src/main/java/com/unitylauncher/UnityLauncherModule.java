@@ -252,7 +252,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     }
     
     @ReactMethod
-    public void launchUnityWithData(String serverURL, String socketURL, String game, String contentId, com.facebook.react.bridge.ReadableMap additionalData) {
+    public void launchUnityWithData(String serverURL, String socketURL, String token, String game, String contentId, com.facebook.react.bridge.ReadableMap additionalData) {
         try {
             if (unityState == UnityState.IDLE || 
                 (unityState == UnityState.STOPPING && System.currentTimeMillis() - lastLaunchTime > 500)) {
@@ -274,6 +274,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 // Add data as extras to the intent
                 intent.putExtra("serverURL", serverURL);
                 intent.putExtra("socketURL", socketURL);
+                intent.putExtra("token", token);
                 intent.putExtra("game", game);
                 intent.putExtra("contentId", contentId);
                 

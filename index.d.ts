@@ -16,6 +16,7 @@ declare module 'react-native-unity-launcher' {
    * Launches the Unity application with data that will be passed to Unity
    * @param serverURL Server URL string to pass to Unity
    * @param socketURL Socket URL string to pass to Unity
+   * @param token Authentication token string to pass to Unity
    * @param game Game identifier string to pass to Unity
    * @param contentId Content identifier string to pass to Unity
    * @param additionalData Optional JSON object with additional data to pass to Unity
@@ -24,6 +25,7 @@ declare module 'react-native-unity-launcher' {
   export function launchUnityWithData(
     serverURL: string,
     socketURL: string,
+    token: string,
     game: string,
     contentId: string,
     additionalData?: Record<string, any>

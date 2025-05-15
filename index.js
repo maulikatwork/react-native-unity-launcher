@@ -13,6 +13,7 @@ export function launchUnityWithCallback(callback) {
 export function launchUnityWithData(
   serverURL,
   socketURL,
+  token,
   game,
   contentId,
   additionalData = {}
@@ -20,6 +21,7 @@ export function launchUnityWithData(
   return UnityLauncher.launchUnityWithData(
     serverURL,
     socketURL,
+    token,
     game,
     contentId,
     additionalData
