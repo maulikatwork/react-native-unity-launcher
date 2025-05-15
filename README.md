@@ -1,107 +1,272 @@
 # React Native Unity Launcher
 
-A React Native package that allows seamless integration and launching of Unity games/apps within React Native applications. This package includes the necessary configurations and AAR files to launch Unity from your React Native app without requiring manual Unity exports.
+A React Native package for launching Unity applications from within React Native apps. Currently targets Android only.
 
 ## Installation
 
-```sh
-# Using npm with git URL
-npm install git+https://github.com/maulikatwork/react-native-unity-launcher.git
-
-# Using yarn with git URL
-yarn add git+https://github.com/maulikatwork/react-native-unity-launcher.git
-```
-
-## Setup
-
-### Android Setup
-
-1. Add the Unity Launcher package to your React Native project's `android/settings.gradle`:
-
-```gradle
-include ':react-native-unity-launcher'
-project(':react-native-unity-launcher').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-unity-launcher/android')
-```
-
-2. In your app level `android/app/build.gradle`, add the Unity Launcher as a dependency:
-
-```gradle
-dependencies {
-    // ... other dependencies
-    implementation project(':react-native-unity-launcher')
-}
-```
-
-3. Register the package in your `MainApplication.java`:
-
-```java
-import com.unitylauncher.UnityLauncherPackage; // Add this import
-
-@Override
-protected List<ReactPackage> getPackages() {
-    List<ReactPackage> packages = new PackageList(this).getPackages();
-    // Add the Unity Launcher package
-    packages.add(new UnityLauncherPackage());
-    return packages;
-}
+```bash
+npm install react-native-unity-launcher --save
 ```
 
 ## Usage
 
+### Launching Unity
+
+Simple way to launch Unity:
+
 ```javascript
-import { UnityLauncher } from 'react-native-unity-launcher';
+import { launchUnity } from 'react-native-unity-launcher';
 
 // Launch Unity
-UnityLauncher.launchUnity();
+launchUnity();
 ```
 
-## API Reference
+### Launching Unity with Callback
 
-Based on the provided code, here are the available methods:
+Launch Unity and receive a callback when returning to React Native:
 
-| Method | Description | Parameters |
-|--------|-------------|------------|
-| `launchUnity()` | Launch the Unity player activity | None |
+```javascript
+import { launchUnityWithCallback } from 'react-native-unity-launcher';
 
-## How It Works
+// Launch Unity with callback
+launchUnityWithCallback(() => {
+  console.log('Returned from Unity');
+  // Do something after returning from Unity
+});
+```
 
-The package includes:
+### Launching Unity with Data
 
-1. **UnityLauncherModule.java**: Contains the native Android module that provides the `launchUnity()` method, which creates and starts an Intent to launch the Unity Player Activity.
+Launch Unity and pass data that can be accessed from Unity:
 
-2. **UnityLauncherPackage.java**: Implements the ReactPackage interface to register the UnityLauncherModule with React Native.
+```javascript
+import { launchUnityWithData } from 'react-native-unity-launcher';
 
-3. **AndroidManifest.xml**: Defines the Unity Player Activity with appropriate configurations:
-   - Full-screen theme
-   - Single task launch mode
-   - Landscape orientation
+// Launch Unity with data
+launchUnityWithData(
+  'https://your-server.com/api',  // serverURL
+  'wss://your-socket-server.com', // socketURL
+  'game-id',                      // game
+  'content-123',                  // contentId
+  {                               // additionalData (optional)
+    userId: 'user123',
+    settings: {
+      difficulty: 'hard',
+      theme: 'dark'
+    }
+  }
+);
+```
 
-No additional Unity AAR files or manual configuration is required as they are bundled with the package.
+## Unity Integration
 
-## Troubleshooting
+### Setting up ReactNativeBridge in Unity
 
-### Common Issues
+1. Create a C# script in Unity named `ReactNativeBridge.cs` in your Assets/Scripts folder:
 
-1. **Unity activity not found**
-   - Ensure the package is properly linked in your Android project
-   - Check that the Unity Player Activity is correctly defined in the manifest
+```csharp
+using UnityEngine;
+using System;
+using System.Collections;
 
-2. **Black screen when launching Unity**
-   - Verify that your device supports the required OpenGL version
-   - Check Unity-specific logs in the Android Logcat
+#if UNITY_ANDROID
+using UnityEngine.Android;
+#endif
 
-3. **Could not find :unity-export: dependency error**
-   - This error occurs when the Android build system cannot locate the Unity AAR file
-   - Make sure you're using the latest version of the package which should include the file in the libs directory
-   - If the error persists, you can also add your Unity app's AAR file manually to the `node_modules/react-native-unity-launcher/android/libs` directory
+public class ReactNativeBridge : MonoBehaviour
+{
+    private static ReactNativeBridge instance;
 
-4. **AndroidManifest.xml package attribute warning**
-   - This warning is related to newer versions of Gradle not supporting the package attribute in the manifest
-   - Update the package to the latest version which uses the proper namespace configuration in build.gradle
+    // Data from React Native
+    public string ServerURL { get; private set; }
+    public string SocketURL { get; private set; }
+    public string Game { get; private set; }
+    public string ContentId { get; private set; }
+    public string AdditionalData { get; private set; }
 
-## Contributing
+    public static ReactNativeBridge Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                GameObject go = new GameObject("ReactNativeBridge");
+                instance = go.AddComponent<ReactNativeBridge>();
+                DontDestroyOnLoad(go);
+            }
+            return instance;
+        }
+    }
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+        
+        // Get data from intent extras
+        GetDataFromIntent();
+    }
+
+    void GetDataFromIntent()
+    {
+#if UNITY_ANDROID
+        try
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                {
+                    using (AndroidJavaObject intent = activity.Call<AndroidJavaObject>("getIntent"))
+                    {
+                        AndroidJavaObject extras = intent.Call<AndroidJavaObject>("getExtras");
+                        if (extras != null)
+                        {
+                            // Get the data passed from React Native
+                            if (extras.Call<bool>("containsKey", "serverURL"))
+                                ServerURL = extras.Call<string>("getString", "serverURL");
+                            
+                            if (extras.Call<bool>("containsKey", "socketURL"))
+                                SocketURL = extras.Call<string>("getString", "socketURL");
+                            
+                            if (extras.Call<bool>("containsKey", "game"))
+                                Game = extras.Call<string>("getString", "game");
+                            
+                            if (extras.Call<bool>("containsKey", "contentId"))
+                                ContentId = extras.Call<string>("getString", "contentId");
+                            
+                            if (extras.Call<bool>("containsKey", "additionalData"))
+                                AdditionalData = extras.Call<string>("getString", "additionalData");
+                            
+                            Debug.Log("Data received from React Native: " + 
+                                      "ServerURL=" + ServerURL + ", " +
+                                      "SocketURL=" + SocketURL + ", " +
+                                      "Game=" + Game + ", " +
+                                      "ContentId=" + ContentId);
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error getting data from intent: " + e.Message);
+        }
+#endif
+    }
+
+    // Parse the additionalData JSON string to a dictionary or custom object
+    public T ParseAdditionalData<T>()
+    {
+        if (string.IsNullOrEmpty(AdditionalData))
+            return default(T);
+            
+        try
+        {
+            return JsonUtility.FromJson<T>(AdditionalData);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error parsing additional data: " + e.Message);
+            return default(T);
+        }
+    }
+
+    // Return to React Native
+    public void ReturnToReactNative()
+    {
+#if UNITY_ANDROID
+        try
+        {
+            using (AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                using (AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity"))
+                {
+                    // Notify React Native that Unity is finishing
+                    using (AndroidJavaObject context = activity.Call<AndroidJavaObject>("getApplicationContext"))
+                    {
+                        // Create a broadcast intent
+                        using (AndroidJavaObject intent = new AndroidJavaObject("android.content.Intent", "com.unitylauncher.UNITY_FINISHED"))
+                        {
+                            context.Call("sendBroadcast", intent);
+                        }
+                    }
+                    
+                    // Finish Unity activity
+                    activity.Call("finish");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Error returning to React Native: " + e.Message);
+        }
+#endif
+    }
+}
+```
+
+2. Attach this script to a GameObject in your Unity scene.
+
+3. Access the data in your Unity scripts:
+
+```csharp
+using UnityEngine;
+
+public class MyGameController : MonoBehaviour
+{
+    void Start()
+    {
+        // Access the data from React Native
+        string serverURL = ReactNativeBridge.Instance.ServerURL;
+        string socketURL = ReactNativeBridge.Instance.SocketURL;
+        string game = ReactNativeBridge.Instance.Game;
+        string contentId = ReactNativeBridge.Instance.ContentId;
+        
+        // Parse additional data if needed
+        AdditionalDataType additionalData = ReactNativeBridge.Instance.ParseAdditionalData<AdditionalDataType>();
+        
+        Debug.Log("Starting game with data: " + 
+                  "serverURL=" + serverURL + ", " +
+                  "game=" + game);
+                  
+        // Use the data in your game logic
+    }
+    
+    // Example class for parsing additionalData
+    [System.Serializable]
+    public class AdditionalDataType
+    {
+        public string userId;
+        public Settings settings;
+    }
+    
+    [System.Serializable]
+    public class Settings
+    {
+        public string difficulty;
+        public string theme;
+    }
+    
+    // Return to React Native when done
+    public void GoBackToReactNative()
+    {
+        ReactNativeBridge.Instance.ReturnToReactNative();
+    }
+}
+```
+
+## Notes
+
+- This package is currently Android-only.
+- iOS support is planned for future releases.
+- All Unity-side changes should be done in your Unity project.
+- The Unity project should export the proper Android library for integration.
 
 ## License
 

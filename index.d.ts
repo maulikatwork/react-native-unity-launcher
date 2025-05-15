@@ -11,4 +11,21 @@ declare module 'react-native-unity-launcher' {
    * @returns The return value from the native Unity launcher module
    */
   export function launchUnityWithCallback(callback: () => void): any;
+
+  /**
+   * Launches the Unity application with data that will be passed to Unity
+   * @param serverURL Server URL string to pass to Unity
+   * @param socketURL Socket URL string to pass to Unity
+   * @param game Game identifier string to pass to Unity
+   * @param contentId Content identifier string to pass to Unity
+   * @param additionalData Optional JSON object with additional data to pass to Unity
+   * @returns The return value from the native Unity launcher module
+   */
+  export function launchUnityWithData(
+    serverURL: string,
+    socketURL: string,
+    game: string,
+    contentId: string,
+    additionalData?: Record<string, any>
+  ): any;
 } 
