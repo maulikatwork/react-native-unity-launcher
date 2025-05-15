@@ -49,50 +49,83 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
         unityActivityCallbacks = new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity created: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity created");
                     isUnityActivityActive = true;
+                } else {
+                    Log.d(TAG, "React Native activity created: " + activityName);
                 }
             }
             
             @Override
             public void onActivityStarted(Activity activity) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity started: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity started");
+                } else {
+                    Log.d(TAG, "React Native activity started: " + activityName);
                 }
             }
             
             @Override
             public void onActivityResumed(Activity activity) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity resumed: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity resumed");
+                } else {
+                    Log.d(TAG, "React Native activity resumed: " + activityName);
                 }
             }
             
             @Override
             public void onActivityPaused(Activity activity) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity paused: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity paused");
+                } else {
+                    Log.d(TAG, "React Native activity paused: " + activityName);
                 }
             }
             
             @Override
             public void onActivityStopped(Activity activity) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity stopped: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity stopped");
+                } else {
+                    Log.d(TAG, "React Native activity stopped: " + activityName);
                 }
             }
             
             @Override
             public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity save instance state: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity state saved");
+                } else {
+                    Log.d(TAG, "React Native activity state saved: " + activityName);
                 }
             }
             
             @Override
             public void onActivityDestroyed(Activity activity) {
-                if (activity.getClass().getName().contains("CustomUnityPlayerActivity")) {
+                String activityName = activity.getClass().getName();
+                Log.d(TAG, "Activity destroyed: " + activityName);
+                
+                if (activityName.contains("CustomUnityPlayerActivity")) {
                     Log.d(TAG, "Unity activity destroyed");
                     isUnityActivityActive = false;
                     isUnityRunning = false;
@@ -103,6 +136,8 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                     }
                     
                     System.gc();
+                } else {
+                    Log.d(TAG, "React Native activity destroyed: " + activityName);
                 }
             }
         };
@@ -118,6 +153,8 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                     unityState = UnityState.IDLE;
                     isUnityRunning = false;
                     
+                    Log.d(TAG, "Unity finished, trying to return to React Native activity");
+                    
                     // Focus the app by bringing existing React Native activity to foreground
                     try {
                         // Try to get the current activity
@@ -125,12 +162,14 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                         
                         if (currentActivity != null) {
                             // If we have a current activity, use it directly instead of launching a new one
+                            Log.d(TAG, "Found existing React Native activity: " + currentActivity.getClass().getSimpleName());
                             Intent bringToFrontIntent = new Intent(currentActivity, currentActivity.getClass());
                             bringToFrontIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                             currentActivity.startActivity(bringToFrontIntent);
-                            Log.d(TAG, "Bringing existing React Native activity to foreground");
+                            Log.d(TAG, "RESUMING existing React Native activity (should preserve state)");
                         } else {
                             // Fallback: use the main launcher intent but with flags to preserve state
+                            Log.d(TAG, "No current React Native activity found, using launcher intent");
                             Intent launchIntent = context.getPackageManager()
                                 .getLaunchIntentForPackage(context.getPackageName());
                             
@@ -138,7 +177,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                                 // Use single top to avoid creating multiple instances
                                 launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                 context.startActivity(launchIntent);
-                                Log.d(TAG, "Bringing React Native app to foreground using launcher intent");
+                                Log.d(TAG, "Launched React Native app using launcher intent");
                             }
                         }
                     } catch (Exception e) {
@@ -222,9 +261,15 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 
                 // Launch Unity with data
                 Intent intent = new Intent(reactContext, com.unity3d.player.CustomUnityPlayerActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                              Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                              Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                // Use only NEW_TASK flag to start Unity without destroying React Native activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                
+                Activity currentActivity = reactContext.getCurrentActivity();
+                if (currentActivity != null) {
+                    Log.d(TAG, "Launching Unity with data from React Native activity: " + currentActivity.getClass().getSimpleName());
+                } else {
+                    Log.d(TAG, "Launching Unity with data (no current React Native activity found)");
+                }
                 
                 // Add data as extras to the intent
                 intent.putExtra("serverURL", serverURL);
@@ -264,10 +309,19 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     
     @Override
     public void onHostResume() {
+        Activity currentActivity = reactContext.getCurrentActivity();
+        if (currentActivity != null) {
+            Log.d(TAG, "React Native host resumed: " + currentActivity.getClass().getSimpleName());
+        } else {
+            Log.d(TAG, "React Native host resumed (no activity reference)");
+        }
+        
         if (isUnityRunning) {
+            Log.d(TAG, "React Native host resumed while Unity was running - Unity is now considered finished");
             isUnityRunning = false;
             
             if (unityReturnCallback != null) {
+                Log.d(TAG, "Executing Unity return callback from onHostResume");
                 unityReturnCallback.invoke();
                 unityReturnCallback = null;
             }
@@ -298,9 +352,16 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
 
     private void actuallyLaunchUnity() {
         Intent intent = new Intent(reactContext, com.unity3d.player.CustomUnityPlayerActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                        Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Use only NEW_TASK flag to start Unity without destroying React Native activity
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        
+        Activity currentActivity = reactContext.getCurrentActivity();
+        if (currentActivity != null) {
+            Log.d(TAG, "Launching Unity from React Native activity: " + currentActivity.getClass().getSimpleName());
+        } else {
+            Log.d(TAG, "Launching Unity (no current React Native activity found)");
+        }
+        
         reactContext.startActivity(intent);
         isUnityRunning = true;
     }
