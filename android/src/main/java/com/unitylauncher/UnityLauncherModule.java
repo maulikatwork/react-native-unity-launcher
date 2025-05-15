@@ -9,6 +9,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.IntentFilter;
+import android.os.Looper;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -35,6 +38,8 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
 
     private UnityState unityState = UnityState.IDLE;
     private long lastLaunchTime = 0;
+
+    private BroadcastReceiver unityFinishedReceiver;
 
     public UnityLauncherModule(ReactApplicationContext context) {
         super(context);
@@ -103,6 +108,34 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
         };
         
         ((Application) reactContext.getApplicationContext()).registerActivityLifecycleCallbacks(unityActivityCallbacks);
+
+        unityFinishedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "Received broadcast from Unity: " + intent.getAction());
+                
+                if ("com.unitylauncher.UNITY_FINISHED".equals(intent.getAction())) {
+                    unityState = UnityState.IDLE;
+                    isUnityRunning = false;
+                    
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (unityReturnCallback != null) {
+                                unityReturnCallback.invoke();
+                                unityReturnCallback = null;
+                            }
+                        }
+                    });
+                    
+                    System.gc();
+                }
+            }
+        };
+        
+        IntentFilter filter = new IntentFilter("com.unitylauncher.UNITY_FINISHED");
+        reactContext.registerReceiver(unityFinishedReceiver, filter);
     }
 
     @Override
@@ -184,6 +217,12 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     public void onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy();
         ((Application) reactContext.getApplicationContext()).unregisterActivityLifecycleCallbacks(unityActivityCallbacks);
+        
+        try {
+            reactContext.unregisterReceiver(unityFinishedReceiver);
+        } catch (Exception e) {
+            Log.e(TAG, "Error unregistering receiver: " + e.getMessage());
+        }
     }
 
     private void actuallyLaunchUnity() {
