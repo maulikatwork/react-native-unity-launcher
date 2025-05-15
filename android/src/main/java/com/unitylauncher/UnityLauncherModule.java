@@ -118,17 +118,28 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                     unityState = UnityState.IDLE;
                     isUnityRunning = false;
                     
-                    // Focus the app by launching the main activity
+                    // Focus the app by bringing existing React Native activity to foreground
                     try {
-                        Intent launchIntent = context.getPackageManager()
-                            .getLaunchIntentForPackage(context.getPackageName());
+                        // Try to get the current activity
+                        Activity currentActivity = reactContext.getCurrentActivity();
                         
-                        if (launchIntent != null) {
-                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
-                                                  Intent.FLAG_ACTIVITY_CLEAR_TOP | 
-                                                  Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                            context.startActivity(launchIntent);
-                            Log.d(TAG, "Bringing React Native app to foreground");
+                        if (currentActivity != null) {
+                            // If we have a current activity, use it directly instead of launching a new one
+                            Intent bringToFrontIntent = new Intent(currentActivity, currentActivity.getClass());
+                            bringToFrontIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            currentActivity.startActivity(bringToFrontIntent);
+                            Log.d(TAG, "Bringing existing React Native activity to foreground");
+                        } else {
+                            // Fallback: use the main launcher intent but with flags to preserve state
+                            Intent launchIntent = context.getPackageManager()
+                                .getLaunchIntentForPackage(context.getPackageName());
+                            
+                            if (launchIntent != null) {
+                                // Use single top to avoid creating multiple instances
+                                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                                context.startActivity(launchIntent);
+                                Log.d(TAG, "Bringing React Native app to foreground using launcher intent");
+                            }
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error focusing app: " + e.getMessage());
