@@ -46,6 +46,7 @@ import { launchUnityWithData } from 'react-native-unity-launcher';
 launchUnityWithData(
   'https://your-server.com/api',  // serverURL
   'wss://your-socket-server.com', // socketURL
+  'auth-token-xyz',               // token
   'game-id',                      // game
   'content-123',                  // contentId
   {                               // additionalData (optional)
@@ -80,6 +81,7 @@ public class ReactNativeBridge : MonoBehaviour
     // Data from React Native
     public string ServerURL { get; private set; }
     public string SocketURL { get; private set; }
+    public string Token { get; private set; }
     public string Game { get; private set; }
     public string ContentId { get; private set; }
     public string AdditionalData { get; private set; }
@@ -134,6 +136,9 @@ public class ReactNativeBridge : MonoBehaviour
                             if (extras.Call<bool>("containsKey", "socketURL"))
                                 SocketURL = extras.Call<string>("getString", "socketURL");
                             
+                            if (extras.Call<bool>("containsKey", "token"))
+                                Token = extras.Call<string>("getString", "token");
+                            
                             if (extras.Call<bool>("containsKey", "game"))
                                 Game = extras.Call<string>("getString", "game");
                             
@@ -146,6 +151,7 @@ public class ReactNativeBridge : MonoBehaviour
                             Debug.Log("Data received from React Native: " + 
                                       "ServerURL=" + ServerURL + ", " +
                                       "SocketURL=" + SocketURL + ", " +
+                                      "Token=" + Token + ", " +
                                       "Game=" + Game + ", " +
                                       "ContentId=" + ContentId);
                         }
@@ -225,6 +231,7 @@ public class MyGameController : MonoBehaviour
         // Access the data from React Native
         string serverURL = ReactNativeBridge.Instance.ServerURL;
         string socketURL = ReactNativeBridge.Instance.SocketURL;
+        string token = ReactNativeBridge.Instance.Token;
         string game = ReactNativeBridge.Instance.Game;
         string contentId = ReactNativeBridge.Instance.ContentId;
         
@@ -233,6 +240,7 @@ public class MyGameController : MonoBehaviour
         
         Debug.Log("Starting game with data: " + 
                   "serverURL=" + serverURL + ", " +
+                  "token=" + token + ", " +
                   "game=" + game);
                   
         // Use the data in your game logic
