@@ -5,6 +5,7 @@
         <activity
             android:name="com.unity3d.player.CustomUnityPlayerActivity"
             android:theme="@style/UnityThemeSelector"
+            android:process=":unity"
             android:launchMode="singleTask" />
     </application>
 </manifest>
