@@ -118,6 +118,23 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                     unityState = UnityState.IDLE;
                     isUnityRunning = false;
                     
+                    // Focus the app by launching the main activity
+                    try {
+                        Intent launchIntent = context.getPackageManager()
+                            .getLaunchIntentForPackage(context.getPackageName());
+                        
+                        if (launchIntent != null) {
+                            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | 
+                                                  Intent.FLAG_ACTIVITY_CLEAR_TOP | 
+                                                  Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                            context.startActivity(launchIntent);
+                            Log.d(TAG, "Bringing React Native app to foreground");
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error focusing app: " + e.getMessage());
+                    }
+                    
+                    // Execute callback on main thread
                     Handler handler = new Handler(Looper.getMainLooper());
                     handler.post(new Runnable() {
                         @Override
