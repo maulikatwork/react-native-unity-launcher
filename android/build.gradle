@@ -29,11 +29,16 @@ repositories {
         // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
         url "$rootDir/../node_modules/react-native/android"
     }
+    repositories {
+           flatDir {
+               dirs 'libs'  // Make sure this points to where your unity-export.aar is now
+           }
+       }
 }
 
 dependencies {
  
-   
+   implementation(name: 'unity-export', ext: 'aar')
     // React Native dependencies
     compileOnly 'com.facebook.react:react-native:+'
 }
