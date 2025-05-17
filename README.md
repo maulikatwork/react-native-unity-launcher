@@ -40,7 +40,7 @@ dependencies {
 #### For Java (MainApplication.java):
 
 ```java
-import com.unitylauncher.UnityLauncherPackage; // Add this import
+import com.mybattle11.unitylauncher.UnityLauncherPackage; // Add this import
 
 @Override
 protected List<ReactPackage> getPackages() {
@@ -54,7 +54,7 @@ protected List<ReactPackage> getPackages() {
 #### For Kotlin (MainApplication.kt):
 
 ```kotlin
-import com.unitylauncher.UnityLauncherPackage // Add this import
+import com.mybattle11.unitylauncher.UnityLauncherPackage // Add this import
 
 override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {

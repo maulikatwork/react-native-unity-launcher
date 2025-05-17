@@ -18,7 +18,7 @@ declare module 'react-native-unity-launcher' {
    * @param socketURL Socket URL string to pass to Unity
    * @param token Authentication token string to pass to Unity
    * @param game Game identifier string to pass to Unity
-   * @param contentId Content identifier string to pass to Unity
+   * @param matchId Match identifier string to pass to Unity
    * @param additionalData Optional JSON object with additional data to pass to Unity
    * @returns The return value from the native Unity launcher module
    */
@@ -27,7 +27,7 @@ declare module 'react-native-unity-launcher' {
     socketURL: string,
     token: string,
     game: string,
-    contentId: string,
+    matchId: string,
     additionalData?: Record<string, any>
   ): any;
 } 

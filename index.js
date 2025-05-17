@@ -15,7 +15,7 @@ export function launchUnityWithData(
   socketURL,
   token,
   game,
-  contentId,
+  matchId,
   additionalData = {}
 ) {
   return UnityLauncher.launchUnityWithData(
@@ -23,7 +23,7 @@ export function launchUnityWithData(
     socketURL,
     token,
     game,
-    contentId,
+    matchId,
     additionalData
   );
 }

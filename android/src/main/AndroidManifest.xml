@@ -3,9 +3,9 @@
 
     <application>
         <activity
-            android:name="com.unity3d.player.CustomUnityPlayerActivity"
+            android:name="com.mybattle11.unity.CustomUnityPlayerActivity"
             android:theme="@style/UnityThemeSelector"
-            android:process=":unity"
+            android:process=":DameModule"
             android:launchMode="singleTask" />
     </application>
 </manifest>

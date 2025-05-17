@@ -1,4 +1,4 @@
-package com.unitylauncher;
+package com.mybattle11.unitylauncher;
 
 import android.content.Intent;
 import android.util.Log;
@@ -149,7 +149,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
             public void onReceive(Context context, Intent intent) {
                 Log.d(TAG, "Received broadcast from Unity: " + intent.getAction());
                 
-                if ("com.unitylauncher.UNITY_FINISHED".equals(intent.getAction())) {
+                if ("com.mybattle11.unitylauncher.UNITY_FINISHED".equals(intent.getAction())) {
                     unityState = UnityState.IDLE;
                     isUnityRunning = false;
                     
@@ -201,7 +201,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
             }
         };
         
-        IntentFilter filter = new IntentFilter("com.unitylauncher.UNITY_FINISHED");
+        IntentFilter filter = new IntentFilter("com.mybattle11.unitylauncher.UNITY_FINISHED");
         // Register receiver with explicit exported flag for Android 12+ compatibility
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             reactContext.registerReceiver(unityFinishedReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
@@ -257,7 +257,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     }
     
     @ReactMethod
-    public void launchUnityWithData(String serverURL, String socketURL, String token, String game, String contentId, com.facebook.react.bridge.ReadableMap additionalData) {
+    public void launchUnityWithData(String serverURL, String socketURL, String token, String game, String matchId, com.facebook.react.bridge.ReadableMap additionalData) {
         try {
             if (unityState == UnityState.IDLE || 
                 (unityState == UnityState.STOPPING && System.currentTimeMillis() - lastLaunchTime > 500)) {
@@ -265,7 +265,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 lastLaunchTime = System.currentTimeMillis();
                 
                 // Launch Unity with data
-                Intent intent = new Intent(reactContext, com.unity3d.player.CustomUnityPlayerActivity.class);
+                Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
                 // Use only NEW_TASK flag to start Unity without destroying React Native activity
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 
@@ -281,7 +281,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 intent.putExtra("socketURL", socketURL);
                 intent.putExtra("token", token);
                 intent.putExtra("game", game);
-                intent.putExtra("contentId", contentId);
+                intent.putExtra("matchId", matchId);
                 
                 // Convert additional data to JSON string and pass it as an extra
                 if (additionalData != null) {
@@ -357,7 +357,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     }
 
     private void actuallyLaunchUnity() {
-        Intent intent = new Intent(reactContext, com.unity3d.player.CustomUnityPlayerActivity.class);
+        Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
         // Use only NEW_TASK flag to start Unity without destroying React Native activity
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
