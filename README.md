@@ -29,13 +29,30 @@ project(':react-native-unity-launcher').projectDir = new File(rootProject.projec
 2. In your app level `android/app/build.gradle`, add the Unity Launcher as a dependency:
 
 ```gradle
+android {
+    // ... other android config
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
 dependencies {
     // ... other dependencies
     implementation project(':react-native-unity-launcher')
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
 }
 ```
 
-3. Register the package in your `MainApplication`:
+3. Create a `libs` directory in your `android/app` folder if it doesn't exist already and copy your Unity AAR file into it:
+
+```bash
+mkdir -p android/app/libs
+# Copy your Unity AAR file to android/app/libs
+```
+
+4. Register the package in your `MainApplication`:
 
 #### For Java (MainApplication.java):
 
