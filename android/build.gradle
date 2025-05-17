@@ -31,7 +31,7 @@ repositories {
     }
     repositories {
            flatDir {
-               dirs 'libs'  // Make sure this points to where your unity-export.aar is now
+               dirs "${rootProject.projectDir}/app/libs"
            }
        }
 }
