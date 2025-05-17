@@ -38,7 +38,7 @@ repositories {
 
 dependencies {
  
-   implementation(name: 'unity-export', ext: 'aar')
+   compileOnly(name: 'unity-export', ext: 'aar')
     // React Native dependencies
     compileOnly 'com.facebook.react:react-native:+'
 }
