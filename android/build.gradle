@@ -20,11 +20,6 @@ android {
         targetSdkVersion 33
     }
 
-    repositories {
-        flatDir {
-            dirs 'libs'
-        }
-    }
 }
 
 repositories {
@@ -37,9 +32,8 @@ repositories {
 }
 
 dependencies {
-    // Use the Unity AAR file from the libs directory
-    implementation fileTree(dir: 'libs', include: ['*.aar'])
-    
+ 
+   
     // React Native dependencies
     compileOnly 'com.facebook.react:react-native:+'
 }
