@@ -5,7 +5,10 @@
         <activity
             android:name="com.mybattle11.unity.CustomUnityPlayerActivity"
             android:theme="@style/UnityThemeSelector"
-            android:process=":DameModule"
-            android:launchMode="singleTask" />
+            android:process=":GameModule"
+            android:launchMode="singleTask" 
+            tools:node="merge"
+            tools:remove="intent-filter"
+            android:exported="false"/>
     </application>
 </manifest>
