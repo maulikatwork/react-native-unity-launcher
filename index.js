@@ -27,3 +27,23 @@ export function launchUnityWithData(
     additionalData
   );
 }
+
+export function launchUnityWithDataCallback(
+  serverURL,
+  socketURL,
+  token,
+  game,
+  matchId,
+  additionalData = {},
+  callback
+) {
+  return UnityLauncher.launchUnityWithDataCallback(
+    serverURL,
+    socketURL,
+    token,
+    game,
+    matchId,
+    additionalData,
+    callback
+  );
+}

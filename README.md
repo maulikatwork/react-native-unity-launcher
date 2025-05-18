@@ -130,6 +130,34 @@ launchUnityWithData(
 );
 ```
 
+### Launching Unity with Data and Callback
+
+Launch Unity with data and receive a callback when returning to React Native:
+
+```javascript
+import { launchUnityWithDataCallback } from 'react-native-unity-launcher';
+
+// Launch Unity with data and callback
+launchUnityWithDataCallback(
+  'https://your-server.com/api',  // serverURL
+  'wss://your-socket-server.com', // socketURL
+  'auth-token-123',               // token
+  'game-id',                      // game
+  'match-123',                    // matchId
+  {                               // additionalData (optional)
+    userId: 'user123',
+    settings: {
+      difficulty: 'hard',
+      theme: 'dark'
+    }
+  },
+  () => {
+    console.log('Returned from Unity');
+    // Do something after returning from Unity
+  }
+);
+```
+
 ## Troubleshooting
 
 ### Common Issues

@@ -306,6 +306,63 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
         }
     }
     
+    @ReactMethod
+    public void launchUnityWithDataCallback(String serverURL, String socketURL, String token, String game, String matchId, com.facebook.react.bridge.ReadableMap additionalData, Callback callback) {
+        try {
+            unityReturnCallback = callback;
+            if (unityState == UnityState.IDLE || 
+                (unityState == UnityState.STOPPING && System.currentTimeMillis() - lastLaunchTime > 500)) {
+                unityState = UnityState.LAUNCHING;
+                lastLaunchTime = System.currentTimeMillis();
+                
+                // Launch Unity with data
+                Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
+                // Use only NEW_TASK flag to start Unity without destroying React Native activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                
+                Activity currentActivity = reactContext.getCurrentActivity();
+                if (currentActivity != null) {
+                    Log.d(TAG, "Launching Unity with data and callback from React Native activity: " + currentActivity.getClass().getSimpleName());
+                } else {
+                    Log.d(TAG, "Launching Unity with data and callback (no current React Native activity found)");
+                }
+                
+                // Add data as extras to the intent
+                intent.putExtra("serverURL", serverURL);
+                intent.putExtra("socketURL", socketURL);
+                intent.putExtra("token", token);
+                intent.putExtra("game", game);
+                intent.putExtra("matchId", matchId);
+                
+                // Convert additional data to JSON string and pass it as an extra
+                if (additionalData != null) {
+                    try {
+                        String additionalDataJson = additionalData.toString();
+                        intent.putExtra("additionalData", additionalDataJson);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing additionalData: " + e.getMessage());
+                    }
+                }
+                
+                reactContext.startActivity(intent);
+                isUnityRunning = true;
+            } else if (unityState == UnityState.PAUSED) {
+                // Resume if paused
+                bringUnityToForeground();
+            } else {
+                Log.w(TAG, "Unity launch requested while in state: " + unityState);
+                if (callback != null) {
+                    callback.invoke("Error: Unity already in state " + unityState);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error launching Unity with data and callback: " + e.getMessage());
+            if (callback != null) {
+                callback.invoke("Error: " + e.getMessage());
+            }
+        }
+    }
+    
     public static void onUnityReturn() {
         if (unityReturnCallback != null) {
             unityReturnCallback.invoke();
