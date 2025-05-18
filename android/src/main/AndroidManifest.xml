@@ -6,9 +6,7 @@
             android:name="com.mybattle11.unity.CustomUnityPlayerActivity"
             android:theme="@style/UnityThemeSelector"
             android:process=":GameModule"
-            android:launchMode="singleTask" 
-            tools:node="replace"
+            android:launchMode="singleTask"
             android:exported="false"/>
-            <intent-filter tools:node="removeAll" />
     </application>
 </manifest>
