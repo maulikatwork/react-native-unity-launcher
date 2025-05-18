@@ -7,8 +7,8 @@
             android:theme="@style/UnityThemeSelector"
             android:process=":GameModule"
             android:launchMode="singleTask" 
-            tools:node="merge"
-            tools:remove="intent-filter"
+            tools:node="replace"
             android:exported="false"/>
+            <intent-filter tools:node="removeAll" />
     </application>
 </manifest>
