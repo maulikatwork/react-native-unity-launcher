@@ -7,6 +7,7 @@
             android:theme="@style/UnityThemeSelector"
             android:process=":GameModule"
             android:launchMode="singleTask"
+            tools:replace="android:exported"
             android:exported="false"/>
     </application>
 </manifest>
