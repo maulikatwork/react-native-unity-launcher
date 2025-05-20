@@ -21,15 +21,33 @@ Pod::Spec.new do |s|
   # Look for UnityFramework in the parent project
   s.frameworks = 'UnityFramework'
   
+  # Preserve paths for UnityFramework
+  s.preserve_paths = 'UnityFramework.framework'
+  
   # Set search paths for UnityFramework
   s.xcconfig = {
-    'FRAMEWORK_SEARCH_PATHS' => '$(inherited) "$(SRCROOT)/../../ios/Frameworks"',
+    'FRAMEWORK_SEARCH_PATHS' => '$(inherited) "$(SRCROOT)/../../ios/Frameworks" "$(PODS_ROOT)/../../react-native-unity-launcher"',
     'HEADER_SEARCH_PATHS' => '$(inherited) "$(SRCROOT)/../../ios/Frameworks/UnityFramework.framework/Headers"'
   }
   
-  # Instructions for installing the Unity framework
+  # Setup and copy UnityFramework from parent project
   s.prepare_command = <<-CMD
-    echo "📱 React Native Unity Launcher: Unity Framework integration"
-    echo "Place UnityFramework.framework in your iOS app's 'ios/Frameworks' directory"
+    echo "📱 React Native Unity Launcher: Setting up Unity Framework..."
+    FRAMEWORK_PATH="../../ios/Frameworks/UnityFramework.framework"
+    DESTINATION_PATH="./UnityFramework.framework"
+    
+    if [ -d "$FRAMEWORK_PATH" ]; then
+      echo "Found UnityFramework at $FRAMEWORK_PATH"
+      if [ -d "$DESTINATION_PATH" ]; then
+        echo "Removing existing copy of UnityFramework"
+        rm -rf "$DESTINATION_PATH"
+      fi
+      echo "Copying UnityFramework to package directory"
+      cp -R "$FRAMEWORK_PATH" "$DESTINATION_PATH"
+      echo "✅ UnityFramework copied successfully"
+    else
+      echo "⚠️ UnityFramework not found at $FRAMEWORK_PATH"
+      echo "Please ensure UnityFramework.framework exists in your iOS app's 'ios/Frameworks' directory"
+    fi
   CMD
 end 
