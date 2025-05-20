@@ -18,17 +18,18 @@ Pod::Spec.new do |s|
   
   s.dependency "React-Core"
   
-  # This podspec doesn't include the Unity framework
-  # The parent app is expected to include it separately
+  # Look for UnityFramework in the parent project
+  s.frameworks = 'UnityFramework'
   
-  # Post install hook to provide setup instructions
-  s.prepare_command = <<-CMD
-    echo "⚠️  The UnityFramework.framework must be added to your main app's Podfile manually"
-    echo "Please see README.md for instructions on adding Unity framework to your project"
-  CMD
-  
-  # To help autolink find the correct header files
-  s.pod_target_xcconfig = {
-    "HEADER_SEARCH_PATHS" => "\"$(PODS_TARGET_SRCROOT)/ios\""
+  # Set search paths for UnityFramework
+  s.xcconfig = {
+    'FRAMEWORK_SEARCH_PATHS' => '$(inherited) "$(SRCROOT)/../../ios/Frameworks"',
+    'HEADER_SEARCH_PATHS' => '$(inherited) "$(SRCROOT)/../../ios/Frameworks/UnityFramework.framework/Headers"'
   }
+  
+  # Instructions for installing the Unity framework
+  s.prepare_command = <<-CMD
+    echo "📱 React Native Unity Launcher: Unity Framework integration"
+    echo "Place UnityFramework.framework in your iOS app's 'ios/Frameworks' directory"
+  CMD
 end 

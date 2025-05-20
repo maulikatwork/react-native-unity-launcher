@@ -229,61 +229,153 @@ For iOS, you need to integrate the Unity framework with your React Native projec
    ios/Frameworks/UnityFramework.framework/
    ```
 
-### 4. Update Podfile
+### 4. Update Your React Native Project's Podfile
 
-Add the following to your app's **Podfile**:
+Modify your main React Native app's Podfile to include the Unity framework. Due to potential issues with framework paths containing spaces, we'll use a script phase approach instead of directly linking the framework:
+
+#### For Standard React Native Projects
 
 ```ruby
 target 'YourAppName' do
   # Standard React Native pods
-  # ...
+  config = use_native_modules!
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    # Other React Native flags...
+  )
 
-  # Unity Launcher
+  # Add the Unity Launcher
   pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
   
-  # Reference the local Unity Framework
-  # Note: This must point to the framework directory, not the framework itself
-  pod 'UnityFramework', :podspec => './Frameworks/UnityFramework.podspec'
+  # Add a script phase to copy the framework at build time
+  script_phase :name => 'Copy Unity Framework',
+               :execution_position => :before_compile,
+               :script => <<-SCRIPT
+                 mkdir -p "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+                 cp -R "${PROJECT_DIR}/Frameworks/UnityFramework.framework" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/"
+               SCRIPT
+
+  # Your other pods...
 end
 
-# Post install hooks for Unity Framework
+# Add this post_install hook
 post_install do |installer|
+  # Standard React Native post install
+  react_native_post_install(installer)
+  
+  # Unity Framework specific configurations
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
       # Disable bitcode for all targets
       config.build_settings['ENABLE_BITCODE'] = 'NO'
-      
-      # If this is the Unity Framework, apply specific settings
-      if target.name == 'UnityFramework'
-        config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
-        config.build_settings['MACH_O_TYPE'] = 'mh_dylib'
-      end
     end
   end
 end
 ```
 
-### 5. Create UnityFramework.podspec
-
-Create a file at `ios/Frameworks/UnityFramework.podspec` with this content:
+#### For Projects Using New Architecture
 
 ```ruby
-Pod::Spec.new do |s|
-  s.name         = "UnityFramework"
-  s.version      = "1.0.0"
-  s.summary      = "Unity Framework for iOS"
-  s.description  = "Unity Framework for iOS integration with React Native"
-  s.homepage     = "https://your-website.com"
-  s.license      = { :type => "Commercial" }
-  s.author       = { "Your Name" => "your.email@example.com" }
-  s.platform     = :ios, "11.0"
-  s.source       = { :git => "https://github.com/your-repo/unity-framework.git", :tag => "#{s.version}" }
-  s.vendored_frameworks = "UnityFramework.framework"
-  s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited) $(PODS_ROOT)/UnityFramework' }
+target 'YourAppName' do
+  # Standard React Native pods
+  config = use_native_modules!
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    :fabric_enabled => true,  # New architecture enabled
+    # Other React Native flags...
+  )
+
+  # Add the Unity Launcher
+  pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
+  
+  # Add a script phase to copy the framework at build time
+  script_phase :name => 'Copy Unity Framework',
+               :execution_position => :before_compile,
+               :script => <<-SCRIPT
+                 mkdir -p "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+                 cp -R "${PROJECT_DIR}/Frameworks/UnityFramework.framework" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/"
+               SCRIPT
+end
+
+# Keep the standard post_install plus Unity configurations
+post_install do |installer|
+  react_native_post_install(installer)
+  __apply_Xcode_12_5_M1_post_install_workaround(installer)
+  
+  # Unity Framework specific configurations
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
 end
 ```
 
-### 6. Update Info.plist
+#### For Projects Using Use_Frameworks!
+
+If your project uses `use_frameworks!` (common with Swift dependencies):
+
+```ruby
+platform :ios, min_ios_version_supported
+prepare_react_native_project!
+
+# Detect linkage type from environment
+linkage = ENV['USE_FRAMEWORKS']
+if linkage != nil
+  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
+  use_frameworks! :linkage => linkage.to_sym
+end
+
+target 'YourAppName' do
+  config = use_native_modules!
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+  
+  # Add Unity Launcher INSIDE the target block
+  pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
+  
+  # Add a script phase to copy the framework at build time
+  script_phase :name => 'Copy Unity Framework',
+               :execution_position => :before_compile,
+               :script => <<-SCRIPT
+                 mkdir -p "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}"
+                 cp -R "${PROJECT_DIR}/Frameworks/UnityFramework.framework" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/"
+               SCRIPT
+  
+  # Your other pods...
+end
+
+post_install do |installer|
+  # Standard React Native post install
+  react_native_post_install(
+    installer,
+    config[:reactNativePath],
+    :mac_catalyst_enabled => false
+  )
+  
+  # Unity Framework specific configurations - may not be needed with script approach
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
+end
+```
+
+#### Important Notes About Podfile Configuration
+
+1. The script phase approach avoids issues with spaces in paths and complex podspec files
+2. Make sure the path to your UnityFramework.framework is correct in the script phase
+3. The script will copy the framework to the correct location at build time
+4. No podspec file is required with this approach
+5. Always include the script phase inside your target block
+6. Always keep the standard React Native post_install hooks
+
+### 5. Update Info.plist
 
 Add these settings to your app's `Info.plist`:
 
@@ -300,7 +392,7 @@ Add these settings to your app's `Info.plist`:
 <string>Used for AR content</string>
 ```
 
-### 7. Install Pods
+### 6. Install Pods
 
 Run pod install to integrate everything:
 
@@ -309,19 +401,21 @@ cd ios
 pod install
 ```
 
-### 8. Verify Integration in Xcode
+### 7. Verify Integration in Xcode
 
 1. Open your app's `.xcworkspace` file in Xcode
-2. Check that `UnityFramework.framework` appears in the Project Navigator
+2. Check that the script phase appears in your target's Build Phases
 3. Build the project to verify there are no linking errors
+4. After building, check that UnityFramework.framework appears in the built products directory
 
 ### Troubleshooting
 
 If you encounter issues:
 
-1. **Framework not found errors:**
-   - Ensure the path in your Podfile correctly points to the UnityFramework.podspec
-   - Check that the framework exists in the specified location
+1. **Framework not copied at build time:**
+   - Verify the path in the script phase is correct
+   - Check that the UnityFramework.framework exists in your Frameworks directory
+   - Try a clean build (Product > Clean Build Folder)
 
 2. **Linking errors:**
    - Make sure your app's deployment target matches or is higher than Unity's minimum iOS version (usually iOS 11.0+)
@@ -337,3 +431,7 @@ If you encounter issues:
 
 5. **Memory issues:**
    - Unity consumes significant memory - implement proper lifecycle handling to release resources when Unity view is dismissed
+
+6. **Spaces in path issues:**
+   - If you have spaces in your project path, you may need to adjust the script phase with proper escaping
+   - Try using double quotes around paths in the script
