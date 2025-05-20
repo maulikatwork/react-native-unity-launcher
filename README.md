@@ -185,3 +185,155 @@ launchUnityWithDataCallback(
 ## License
 
 MIT
+
+## iOS Integration
+
+For iOS, you need to integrate the Unity framework with your React Native project. Follow these steps:
+
+### 1. Build Unity iOS Framework
+
+1. Open your Unity project
+2. Go to **File > Build Settings**
+3. Switch platform to **iOS**
+4. Enable **Create Xcode Project** option
+5. Set **Target SDK** to **Device SDK**
+6. Click **Build**
+7. Select destination folder for the Xcode project
+
+### 2. Generate the UnityFramework.framework
+
+1. Open the generated Xcode project
+2. In the scheme selector, choose **UnityFramework** (not Unity-iPhone)
+3. Set build configuration to **Release**
+4. Select **Generic iOS Device** as the destination
+5. Go to **Product > Build** (or press ⌘B)
+6. After successful build, go to **Product > Show Build Folder in Finder**
+7. Navigate to **Products/Release-iphoneos/** folder
+8. Find **UnityFramework.framework** there
+
+### 3. Add Framework to React Native iOS Project
+
+1. Create a **Frameworks** directory in your React Native app's iOS folder:
+   ```bash
+   mkdir -p YourReactNativeApp/ios/Frameworks
+   ```
+
+2. Copy the Unity framework to this directory:
+   ```bash
+   cp -R /path/to/UnityFramework.framework YourReactNativeApp/ios/Frameworks/
+   ```
+
+3. If needed, add the framework to your .gitignore:
+   ```
+   # Add to .gitignore if framework is large
+   ios/Frameworks/UnityFramework.framework/
+   ```
+
+### 4. Update Podfile
+
+Add the following to your app's **Podfile**:
+
+```ruby
+target 'YourAppName' do
+  # Standard React Native pods
+  # ...
+
+  # Unity Launcher
+  pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
+  
+  # Reference the local Unity Framework
+  # Note: This must point to the framework directory, not the framework itself
+  pod 'UnityFramework', :podspec => './Frameworks/UnityFramework.podspec'
+end
+
+# Post install hooks for Unity Framework
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      # Disable bitcode for all targets
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+      
+      # If this is the Unity Framework, apply specific settings
+      if target.name == 'UnityFramework'
+        config.build_settings['CLANG_ENABLE_MODULES'] = 'YES'
+        config.build_settings['MACH_O_TYPE'] = 'mh_dylib'
+      end
+    end
+  end
+end
+```
+
+### 5. Create UnityFramework.podspec
+
+Create a file at `ios/Frameworks/UnityFramework.podspec` with this content:
+
+```ruby
+Pod::Spec.new do |s|
+  s.name         = "UnityFramework"
+  s.version      = "1.0.0"
+  s.summary      = "Unity Framework for iOS"
+  s.description  = "Unity Framework for iOS integration with React Native"
+  s.homepage     = "https://your-website.com"
+  s.license      = { :type => "Commercial" }
+  s.author       = { "Your Name" => "your.email@example.com" }
+  s.platform     = :ios, "11.0"
+  s.source       = { :git => "https://github.com/your-repo/unity-framework.git", :tag => "#{s.version}" }
+  s.vendored_frameworks = "UnityFramework.framework"
+  s.xcconfig = { 'FRAMEWORK_SEARCH_PATHS' => '$(inherited) $(PODS_ROOT)/UnityFramework' }
+end
+```
+
+### 6. Update Info.plist
+
+Add these settings to your app's `Info.plist`:
+
+```xml
+<key>UIRequiresFullScreen</key>
+<true/>
+<key>UIViewControllerBasedStatusBarAppearance</key>
+<false/>
+<key>UIRequiredDeviceCapabilities</key>
+<array>
+  <string>arm64</string>
+</array>
+<key>NSCameraUsageDescription</key>
+<string>Used for AR content</string>
+```
+
+### 7. Install Pods
+
+Run pod install to integrate everything:
+
+```bash
+cd ios
+pod install
+```
+
+### 8. Verify Integration in Xcode
+
+1. Open your app's `.xcworkspace` file in Xcode
+2. Check that `UnityFramework.framework` appears in the Project Navigator
+3. Build the project to verify there are no linking errors
+
+### Troubleshooting
+
+If you encounter issues:
+
+1. **Framework not found errors:**
+   - Ensure the path in your Podfile correctly points to the UnityFramework.podspec
+   - Check that the framework exists in the specified location
+
+2. **Linking errors:**
+   - Make sure your app's deployment target matches or is higher than Unity's minimum iOS version (usually iOS 11.0+)
+   - Unity uses IL2CPP by default which requires arm64 architecture - make sure your app supports arm64
+
+3. **Runtime crashes:**
+   - Unity requires full screen mode - ensure UIRequiresFullScreen is set to true in Info.plist
+   - Check Unity's logs in the Xcode console for specific error messages
+
+4. **Black screen when launching Unity:**
+   - Verify your device supports the required Metal version
+   - Enable Metal API validation in Xcode's scheme editor for more detailed errors
+
+5. **Memory issues:**
+   - Unity consumes significant memory - implement proper lifecycle handling to release resources when Unity view is dismissed
