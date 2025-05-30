@@ -1,4 +1,4 @@
-package com.mybattle11.unitylauncher;
+package com.mychampx1.unitylauncher;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;

@@ -26,7 +26,7 @@ RCT_EXPORT_METHOD(launchUnity:(NSDictionary *)params
     // Setup notification observer for when Unity exits
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                              selector:@selector(unityDidFinish:) 
-                                                 name:@"com.mybattle11.unitylauncher.UNITY_FINISHED" 
+                                                 name:@"com.mychampx1.unitylauncher.UNITY_FINISHED" 
                                                object:nil];
     
     resolve(@{@"success": @YES});
@@ -68,7 +68,7 @@ RCT_EXPORT_METHOD(launchUnityWithDataCallback:(NSString *)serverURL
     // Setup notification observer for when Unity exits
     [[NSNotificationCenter defaultCenter] addObserver:self 
                                             selector:@selector(unityDidFinishWithCallback:) 
-                                                name:@"com.mybattle11.unitylauncher.UNITY_FINISHED" 
+                                                name:@"com.mychampx1.unitylauncher.UNITY_FINISHED" 
                                               object:nil];
   });
 }
@@ -140,7 +140,7 @@ RCT_EXPORT_METHOD(launchUnityWithDataCallback:(NSString *)serverURL
     
     // Clean up
     [userDefaults removeObjectForKey:@"UnityResultData"];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"com.mybattle11.unitylauncher.UNITY_FINISHED" object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"com.mychampx1.unitylauncher.UNITY_FINISHED" object:nil];
   });
 }
 
@@ -161,7 +161,7 @@ RCT_EXPORT_METHOD(launchUnityWithDataCallback:(NSString *)serverURL
       // Clean up
       self.unityFinishedCallback = nil;
       [userDefaults removeObjectForKey:@"UnityResultData"];
-      [[NSNotificationCenter defaultCenter] removeObserver:self name:@"com.mybattle11.unitylauncher.UNITY_FINISHED" object:nil];
+      [[NSNotificationCenter defaultCenter] removeObserver:self name:@"com.mychampx1.unitylauncher.UNITY_FINISHED" object:nil];
     }
   });
 }

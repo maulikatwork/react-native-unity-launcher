@@ -57,7 +57,7 @@ mkdir -p android/app/libs
 #### For Java (MainApplication.java):
 
 ```java
-import com.mybattle11.unitylauncher.UnityLauncherPackage; // Add this import
+import com.mychampx1.unitylauncher.UnityLauncherPackage; // Add this import
 
 @Override
 protected List<ReactPackage> getPackages() {
@@ -71,7 +71,7 @@ protected List<ReactPackage> getPackages() {
 #### For Kotlin (MainApplication.kt):
 
 ```kotlin
-import com.mybattle11.unitylauncher.UnityLauncherPackage // Add this import
+import com.mychampx1.unitylauncher.UnityLauncherPackage // Add this import
 
 override fun getPackages(): List<ReactPackage> =
             PackageList(this).packages.apply {
@@ -87,7 +87,7 @@ override fun getPackages(): List<ReactPackage> =
 Simple way to launch Unity:
 
 ```javascript
-import { launchUnity } from 'react-native-unity-launcher';
+import { launchUnity } from "react-native-unity-launcher";
 
 // Launch Unity
 launchUnity();
@@ -98,11 +98,11 @@ launchUnity();
 Launch Unity and receive a callback when returning to React Native:
 
 ```javascript
-import { launchUnityWithCallback } from 'react-native-unity-launcher';
+import { launchUnityWithCallback } from "react-native-unity-launcher";
 
 // Launch Unity with callback
 launchUnityWithCallback(() => {
-  console.log('Returned from Unity');
+  console.log("Returned from Unity");
   // Do something after returning from Unity
 });
 ```
@@ -112,20 +112,21 @@ launchUnityWithCallback(() => {
 Launch Unity and pass data that can be accessed from Unity:
 
 ```javascript
-import { launchUnityWithData } from 'react-native-unity-launcher';
+import { launchUnityWithData } from "react-native-unity-launcher";
 
 // Launch Unity with data
 launchUnityWithData(
-  'https://your-server.com/api',  // serverURL
-  'wss://your-socket-server.com', // socketURL
-  'game-id',                      // game
-  'content-123',                  // contentId
-  {                               // additionalData (optional)
-    userId: 'user123',
+  "https://your-server.com/api", // serverURL
+  "wss://your-socket-server.com", // socketURL
+  "game-id", // game
+  "content-123", // contentId
+  {
+    // additionalData (optional)
+    userId: "user123",
     settings: {
-      difficulty: 'hard',
-      theme: 'dark'
-    }
+      difficulty: "hard",
+      theme: "dark",
+    },
   }
 );
 ```
@@ -135,24 +136,25 @@ launchUnityWithData(
 Launch Unity with data and receive a callback when returning to React Native:
 
 ```javascript
-import { launchUnityWithDataCallback } from 'react-native-unity-launcher';
+import { launchUnityWithDataCallback } from "react-native-unity-launcher";
 
 // Launch Unity with data and callback
 launchUnityWithDataCallback(
-  'https://your-server.com/api',  // serverURL
-  'wss://your-socket-server.com', // socketURL
-  'auth-token-123',               // token
-  'game-id',                      // game
-  'match-123',                    // matchId
-  {                               // additionalData (optional)
-    userId: 'user123',
+  "https://your-server.com/api", // serverURL
+  "wss://your-socket-server.com", // socketURL
+  "auth-token-123", // token
+  "game-id", // game
+  "match-123", // matchId
+  {
+    // additionalData (optional)
+    userId: "user123",
     settings: {
-      difficulty: 'hard',
-      theme: 'dark'
-    }
+      difficulty: "hard",
+      theme: "dark",
+    },
   },
   () => {
-    console.log('Returned from Unity');
+    console.log("Returned from Unity");
     // Do something after returning from Unity
   }
 );
@@ -163,10 +165,12 @@ launchUnityWithDataCallback(
 ### Common Issues
 
 1. **Unity activity not found**
+
    - Ensure the package is properly linked in your Android project
    - Check that the Unity Player Activity is correctly defined in the manifest
 
 2. **Black screen when launching Unity**
+
    - Verify that your device supports the required OpenGL version
    - Check Unity-specific logs in the Android Logcat
 
@@ -214,11 +218,13 @@ For iOS, you need to integrate the Unity framework with your React Native projec
 ### 3. Add Framework to React Native iOS Project
 
 1. Create a **Frameworks** directory in your React Native app's iOS folder:
+
    ```bash
    mkdir -p YourReactNativeApp/ios/Frameworks
    ```
 
 2. Copy the Unity framework to this directory:
+
    ```bash
    cp -R /path/to/UnityFramework.framework YourReactNativeApp/ios/Frameworks/
    ```
@@ -247,7 +253,7 @@ target 'YourAppName' do
 
   # Add the Unity Launcher
   pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
-  
+
   # Add a script phase to copy the framework at build time
   script_phase :name => 'Copy Unity Framework',
                :execution_position => :before_compile,
@@ -263,7 +269,7 @@ end
 post_install do |installer|
   # Standard React Native post install
   react_native_post_install(installer)
-  
+
   # Unity Framework specific configurations
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
@@ -289,7 +295,7 @@ target 'YourAppName' do
 
   # Add the Unity Launcher
   pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
-  
+
   # Add a script phase to copy the framework at build time
   script_phase :name => 'Copy Unity Framework',
                :execution_position => :before_compile,
@@ -303,7 +309,7 @@ end
 post_install do |installer|
   react_native_post_install(installer)
   __apply_Xcode_12_5_M1_post_install_workaround(installer)
-  
+
   # Unity Framework specific configurations
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
@@ -334,10 +340,10 @@ target 'YourAppName' do
     :path => config[:reactNativePath],
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-  
+
   # Add Unity Launcher INSIDE the target block
   pod 'react-native-unity-launcher', :path => '../node_modules/react-native-unity-launcher'
-  
+
   # Add a script phase to copy the framework at build time
   script_phase :name => 'Copy Unity Framework',
                :execution_position => :before_compile,
@@ -345,7 +351,7 @@ target 'YourAppName' do
                  mkdir -p "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}"
                  cp -R "${PROJECT_DIR}/Frameworks/UnityFramework.framework" "${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/"
                SCRIPT
-  
+
   # Your other pods...
 end
 
@@ -356,7 +362,7 @@ post_install do |installer|
     config[:reactNativePath],
     :mac_catalyst_enabled => false
   )
-  
+
   # Unity Framework specific configurations - may not be needed with script approach
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
@@ -413,23 +419,28 @@ pod install
 If you encounter issues:
 
 1. **Framework not copied at build time:**
+
    - Verify the path in the script phase is correct
    - Check that the UnityFramework.framework exists in your Frameworks directory
    - Try a clean build (Product > Clean Build Folder)
 
 2. **Linking errors:**
+
    - Make sure your app's deployment target matches or is higher than Unity's minimum iOS version (usually iOS 11.0+)
    - Unity uses IL2CPP by default which requires arm64 architecture - make sure your app supports arm64
 
 3. **Runtime crashes:**
+
    - Unity requires full screen mode - ensure UIRequiresFullScreen is set to true in Info.plist
    - Check Unity's logs in the Xcode console for specific error messages
 
 4. **Black screen when launching Unity:**
+
    - Verify your device supports the required Metal version
    - Enable Metal API validation in Xcode's scheme editor for more detailed errors
 
 5. **Memory issues:**
+
    - Unity consumes significant memory - implement proper lifecycle handling to release resources when Unity view is dismissed
 
 6. **Spaces in path issues:**

@@ -1,4 +1,4 @@
-package com.mybattle11.unitylauncher;
+package com.mychampx1.unitylauncher;
 
 import android.content.Intent;
 import android.util.Log;
@@ -149,7 +149,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
             public void onReceive(Context context, Intent intent) {
                 Log.d(TAG, "Received broadcast from Unity: " + intent.getAction());
                 
-                if ("com.mybattle11.unitylauncher.UNITY_FINISHED".equals(intent.getAction())) {
+                if ("com.mychampx1.unitylauncher.UNITY_FINISHED".equals(intent.getAction())) {
                     unityState = UnityState.IDLE;
                     isUnityRunning = false;
                     
@@ -201,7 +201,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
             }
         };
         
-        IntentFilter filter = new IntentFilter("com.mybattle11.unitylauncher.UNITY_FINISHED");
+        IntentFilter filter = new IntentFilter("com.mychampx1.unitylauncher.UNITY_FINISHED");
         // Register receiver with explicit exported flag for Android 12+ compatibility
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             reactContext.registerReceiver(unityFinishedReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
@@ -265,7 +265,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 lastLaunchTime = System.currentTimeMillis();
                 
                 // Launch Unity with data
-                Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
+                Intent intent = new Intent(reactContext, com.mychampx1.unity.CustomUnityPlayerActivity.class);
                 // Use only NEW_TASK flag to start Unity without destroying React Native activity
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 
@@ -316,7 +316,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
                 lastLaunchTime = System.currentTimeMillis();
                 
                 // Launch Unity with data
-                Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
+                Intent intent = new Intent(reactContext, com.mychampx1.unity.CustomUnityPlayerActivity.class);
                 // Use only NEW_TASK flag to start Unity without destroying React Native activity
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 
@@ -414,7 +414,7 @@ public class UnityLauncherModule extends ReactContextBaseJavaModule implements L
     }
 
     private void actuallyLaunchUnity() {
-        Intent intent = new Intent(reactContext, com.mybattle11.unity.CustomUnityPlayerActivity.class);
+        Intent intent = new Intent(reactContext, com.mychampx1.unity.CustomUnityPlayerActivity.class);
         // Use only NEW_TASK flag to start Unity without destroying React Native activity
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
